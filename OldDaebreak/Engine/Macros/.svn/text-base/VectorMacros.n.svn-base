@@ -1,9 +1,0 @@
-using Nemerle.Compiler;
-using Nextem.String;
-
-namespace Daebreak {
-	[assembly: Nemerle.Internal.OperatorAttribute ("Daebreak", "cross", false, 200, 201)]
-	macro cross(a, b) { <[ $a.Cross($b) ]> }
-	[assembly: Nemerle.Internal.OperatorAttribute ("Daebreak", "dot", false, 200, 201)]
-	macro dot(a, b) { <[ $a.Dot($b) ]> }
-}
