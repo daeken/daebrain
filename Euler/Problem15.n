@@ -1,0 +1,15 @@
+using Nemerle.Collections;
+mutable count = 0L;
+def memo = Hashtable.[int*int, long]();
+def walk(x, y) {
+	if(x == 20 && y == 20) count++;
+	else if(memo.ContainsKey((x, y))) count += memo[(x, y)] 
+	else {
+		def curcount = count;
+		when(x < 20) walk(x+1, y);
+		when(y < 20) walk(x, y+1);
+		memo[(x, y)] = count - curcount;
+	}
+}
+walk(0, 0);
+System.Console.WriteLine(count)

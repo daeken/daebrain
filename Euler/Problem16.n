@@ -1,0 +1,34 @@
+using System;
+
+def digits = array(333);
+def carry = array(333);
+digits[0] = 1;
+
+def pow(power) {
+	carry[0] = 0;
+	def mul(i) {
+		digits[i] *= 2;
+		unless(carry[i] == 0) digits[i] += carry[i];
+		if(digits[i] > 9) {
+			carry[i+1] = digits[i] / 10;
+			digits[i] %= 10
+		} else carry[i+1] = 0;
+		
+		when(i+1 < digits.Length-1) mul(i+1)
+	}
+	if(power > 0) { mul(0); pow(power-1) }
+	else digits
+}
+
+def sum(arr) {
+	mutable ret = 0;
+	Array.Reverse(arr);
+	foreach(elem in arr) {
+		Console.Write("{0}", elem);
+		ret += elem;
+	}
+	Console.WriteLine("");
+	ret
+}
+
+System.Console.WriteLine(sum(pow(1000)));

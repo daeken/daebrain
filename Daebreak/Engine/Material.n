@@ -1,0 +1,14 @@
+using System;
+using Nextem.String;
+
+namespace Daebreak {
+	public abstract class Material {
+		public abstract ApplyMultiple : bool {
+			get
+		}
+		
+		protected Rnd : Random = Random();
+		
+		public abstract Bake(moles : list [Mole]) : list [Mole];
+	}
+}

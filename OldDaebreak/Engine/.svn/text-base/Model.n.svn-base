@@ -1,0 +1,95 @@
+using Nextem.String;
+using Tao.OpenGl.Gl;
+
+namespace Daebreak {
+	public class Model {
+		protected mutable Mesh : Mesh = [];
+		
+		public CreateBox(org : Point, size : Point) : void {
+			Mesh = CreateBoxMesh(org, size, Mesh)
+		}
+		
+		public static CreateBoxMesh(org : Point, size : Point, accum : Mesh = null) : Mesh {
+			def (x, y, z) = org;
+			def (sx, sy, sz) = size;
+			
+			def add(list, accum) {
+				match(list) {
+					| a :: b :: c :: tail =>
+						add(
+							tail,
+							Triangle(a, b, c) :: accum
+						)
+					| _ => accum
+				}
+			}
+			
+			add(
+				[
+					(x   , y   , z   ), (x   , y+sy, z   ), (x+sx, y+sy, z   ),
+					(x   , y   , z+sz), (x   , y+sy, z+sz), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x+sx, y   , z   ), (x+sx, y+sy, z   ),
+					(x   , y   , z+sz), (x+sx, y   , z+sz), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x   , y+sy, z   ), (x   , y+sy, z+sz),
+					(x+sx, y   , z   ), (x+sx, y+sy, z   ), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x   , y   , z+sz), (x   , y+sy, z+sz),
+					(x+sx, y   , z   ), (x+sx, y   , z+sz), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x+sx, y   , z   ), (x+sx, y   , z+sz),
+					(x   , y+sy, z   ), (x+sx, y+sy, z   ), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x   , y   , z+sz), (x+sx, y   , z+sz),
+					(x   , y+sy, z   ), (x   , y+sy, z+sz), (x+sx, y+sy, z+sz)
+				],
+				if(accum == null) [] else accum
+			)
+		}
+		
+		public Cut(cutMesh : Mesh, _refill : bool = false) : void {
+			def cut(list, accum=[]) {
+				match(list) {
+					| [] => accum
+					| head :: tail =>
+						cut(
+							tail, 
+							head.Tessellate(cutMesh, accum)
+						)
+				}
+			}
+			
+			Mesh = cut(Mesh)
+		}
+		
+		public Translate(x : float, y : float, z : float) : void { Translate(Vec3(x, y, z)) }
+		public Translate(vec : Vec3) : void {
+			def translate(list, accum=[]) {
+				match(list) {
+					| [] => accum
+					| head :: tail => translate(tail, head.Translate(vec) :: accum)
+				}
+			}
+			
+			Mesh = translate(Mesh)
+		}
+		
+		public Render() : void {
+			def drawList(list) {
+				| [] => ()
+				| head :: tail =>
+					def (a, b, c) = head.Points;
+					glVertex3f(a);
+					glVertex3f(b);
+					glVertex3f(c);
+					drawList(tail)
+			}
+			
+			glTranslatef(0f, 0f, -50f);
+			glBegin(GL_TRIANGLES);
+			drawList(Mesh);
+			glEnd()
+		}
+	}
+}

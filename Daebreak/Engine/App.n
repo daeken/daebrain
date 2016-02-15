@@ -1,0 +1,66 @@
+using SdlDotNet.Core;
+using SdlDotNet.Input;
+using SdlDotNet.Graphics;
+using Tao.OpenGl.Gl;
+using Tao.OpenGl.Glu;
+
+using Nextem.String;
+
+namespace Daebreak {
+	public abstract class App {
+		width = 800f;
+		height = 600f;
+		
+		public this() {
+			Events.Tick += Tick;
+			Events.Quit +=
+				fun(_, _) {
+					Events.QuitApplication()
+				}
+			Events.Fps = 60;
+			
+			_ = Video.SetVideoMode(width :> int, height :> int, true, true);
+			
+			Reshape(100f);
+			
+			glShadeModel(GL_SMOOTH);
+			glClearColor(0.0F, 0.0F, 0.0F, 0.5F);
+			glClearDepth(1.0F);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+			glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+			glDisable(GL_CULL_FACE);
+			glEnable(GL_COLOR);
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			
+			glLightfv(GL_LIGHT1, GL_AMBIENT, array [0.5f, 0.5f, 0.5f, 1f]);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, array [1f, 1f, 1f, 1f]);
+			glLightfv(GL_LIGHT1, GL_POSITION, array [0f, -5f, 0f, 1f]);
+			glEnable(GL_LIGHT1);
+			glEnable(GL_LIGHTING);
+		}
+		
+		protected Reshape(distance : float) : void {
+			glViewport(0, 0, width :> int, height :> int);
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluPerspective(45.0F, (width / height), 0.1F, distance);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity()
+		}
+		
+		Tick(_ : object, _ : TickEventArgs) : void {
+			glClear((GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+			glLoadIdentity();
+			glTranslatef(0f, 0f, -50f);
+			Render();
+			Video.GLSwapBuffers()
+		}
+		
+		public Start() : void {
+			Events.Run()
+		}
+		
+		public abstract Render() : void;
+	}
+}

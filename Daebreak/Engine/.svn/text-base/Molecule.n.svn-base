@@ -1,0 +1,92 @@
+using System;
+using System.Math;
+using Nextem.String;
+using Tao.OpenGl.Gl;
+
+namespace Daebreak {
+	public type Point = float * float * float;
+	public type Mole = Molecule;
+	public type Moles = list [Molecule];
+	
+	[Record(Include=[Position, Size, Material])]
+	public class Molecule {
+		public Position : Point;
+		public Size : Point;
+		
+		public Material : Material;
+		
+		public End : Point {
+			get {
+				(Position[0]+Size[0], Position[1]+Size[1], Position[2]+Size[2])
+			}
+		}
+		
+		public Item [ind : int] : Point {
+			get {
+				match(ind) {
+					| 1 => Size
+					| _ => Position
+				}
+			}
+		}
+		
+		public Render() : void {
+			def drawTris(tris) {
+				| [] => glEnd()
+				| vert :: tail =>
+					def (x, y, z) = (-vert[0], -vert[1], vert[2]);
+					def len = Sqrt(((x*x) + (y*y) + (z*z)) : float) :> float;
+					def len = if(len == 0f) 1f else len;
+					glNormal3f((x/len, y/len, z/len));
+					glVertex3f(vert);
+					drawTris(tail)
+			}
+			
+			def (x, y, z) = Position;
+			def (sx, sy, sz) = Size;
+			
+			glBegin(GL_TRIANGLES);
+			
+			drawTris(
+				[
+					(x   , y   , z   ), (x   , y+sy, z   ), (x+sx, y+sy, z   ),
+					(x   , y   , z+sz), (x   , y+sy, z+sz), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x+sx, y   , z   ), (x+sx, y+sy, z   ),
+					(x   , y   , z+sz), (x+sx, y   , z+sz), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x   , y+sy, z   ), (x   , y+sy, z+sz),
+					(x+sx, y   , z   ), (x+sx, y+sy, z   ), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x   , y   , z+sz), (x   , y+sy, z+sz),
+					(x+sx, y   , z   ), (x+sx, y   , z+sz), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x+sx, y   , z   ), (x+sx, y   , z+sz),
+					(x   , y+sy, z   ), (x+sx, y+sy, z   ), (x+sx, y+sy, z+sz),
+					
+					(x   , y   , z   ), (x   , y   , z+sz), (x+sx, y   , z+sz),
+					(x   , y+sy, z   ), (x   , y+sy, z+sz), (x+sx, y+sy, z+sz)
+				]
+			)
+		}
+		
+		public Intersects(mole : Mole) : bool {
+			def (asx, asy, asz) = Position;
+			def aex = asx + Size[0];
+			def aey = asy + Size[1];
+			def aez = asz + Size[2];
+			def (bsx, bsy, bsz) = mole.Position;
+			def bex = bsx + mole.Size[0];
+			def bey = bsy + mole.Size[1];
+			def bez = bsz + mole.Size[2];
+			
+			((asx >= bsx && asx <= bex) || (bsx >= asx && bsx <= aex)) && 
+			((asy >= bsy && asy <= bey) || (bsy >= asy && bsy <= aey)) && 
+			((asz >= bsz && asz <= bez) || (bsz >= asz && bsz <= aez)) && 
+			!(
+				aex == bsx || aey == bsy || aez == bsz ||
+				bex == asx || bey == asy || bez == asz
+			)
+		}
+	}
+}

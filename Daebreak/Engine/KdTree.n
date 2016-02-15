@@ -1,0 +1,44 @@
+using Nextem.String;
+
+namespace Daebreak {
+	public variant Split {
+		| X
+		| Y
+		| Z
+		
+		public Next() : Split {
+			match(this) {
+				| _ is X => Y()
+				| _ is Y => Z()
+				| _ => X()
+			}
+		}
+	}
+	
+	// Happy trees
+	public variant KdTree {
+		| Node {
+			Boundary : Mole;
+			A : KdTree;
+			B : KdTree
+		}
+		| Leaf {
+			Moles : Mole
+		}
+		
+		public static Empty : KdTree = 
+			Node(
+				Mole((0f, 0f, 0f), (0f, 0f, 0f), null), 
+				null,
+				null
+			);
+		
+		public Intersects(mole : Mole) : bool {
+			match(this) {
+				| Node(bound, _, _)
+				| Leaf(bound) =>
+					bound.Intersects(mole)
+			}
+		}
+	}
+}
